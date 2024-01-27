@@ -44,6 +44,8 @@ services:
     hostname: mysql.lan
     expose:
       - 3306
+    ports:
+      - 13306:3306
     volumes:
       - './docker/scripts/:/docker-entrypoint-initdb.d/'
       - './docker/conf/50-server.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf'
