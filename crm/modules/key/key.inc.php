@@ -27,7 +27,7 @@
  * this number.
  */
 function key_revision () {
-    return 2;
+    return 3;
 }
 
 /**
@@ -92,6 +92,16 @@ function key_install($old_revision = 0) {
             }
         }
     }
+
+    // Added Pin Column
+    if ($old_revision < 3) {
+        $sql = 'ALTER TABLE `key`
+            MODIFY `slot` varchar(255), 
+            ADD COLUMN `pin` int(4) ZEROFILL NOT NULL
+        ';
+        $res = mysqli_query($db_connect, $sql);
+        if (!$res) die(mysqli_error($res ));
+    }
 }
 
 // Utility functions ///////////////////////////////////////////////////////////
@@ -142,7 +152,7 @@ function key_data ($opts = array()) {
         , `start`
         , `end`
         , `serial`
-        , `slot`
+        , `pin`
         FROM `key`
         WHERE 1
     ";
@@ -185,7 +195,7 @@ function key_data ($opts = array()) {
     $keys = array();
     $row = mysqli_fetch_assoc($res);
     while (!empty($row)) {
-        // Contents of row are kid, cid, start, end, serial, slot
+        // Contents of row are kid, cid, start, end, serial, slot, pin
         $keys[] = $row;
         $row = mysqli_fetch_assoc($res);
     }
@@ -250,7 +260,7 @@ function key_save ($key) {
         return crm_url("contact&cid=$_POST[cid]&tab=keys");
     }
     // Escape values
-    $fields = array('kid', 'cid', 'serial', 'slot', 'start', 'end');
+    $fields = array('kid', 'cid', 'serial', 'start', 'end', 'pin');
     if (isset($key['kid'])) {
         // Update existing key
         $kid = $key['kid'];
@@ -349,12 +359,16 @@ function key_table ($opts) {
     if (user_access('key_view') || $opts['cid'] == user_id()) {
         if ($export) {
             $table['columns'][] = array("title"=>'cid', 'class'=>'', 'id'=>'');
-        }
+            $table['columns'][] = array("title"=>'Name', 'class'=>'', 'id'=>'');
+            $table['columns'][] = array("title"=>'Serial', 'class'=>'', 'id'=>'');
+            $table['columns'][] = array("title"=>'PIN', 'class'=>'', 'id'=>'');
+        } else {
         $table['columns'][] = array("title"=>'Name', 'class'=>'', 'id'=>'');
         $table['columns'][] = array("title"=>'Serial', 'class'=>'', 'id'=>'');
-        $table['columns'][] = array("title"=>'Slot', 'class'=>'', 'id'=>'');
         $table['columns'][] = array("title"=>'Start', 'class'=>'', 'id'=>'');
         $table['columns'][] = array("title"=>'End', 'class'=>'', 'id'=>'');
+        $table['columns'][] = array("title"=>'PIN', 'class'=>'', 'id'=>'');
+        }
     }
     // Add ops column
     if (!$export && (user_access('key_edit') || user_access('key_delete'))) {
@@ -368,12 +382,16 @@ function key_table ($opts) {
             // Add cells
             if ($export) {
                 $row[] = $key['cid'];
+                $row[] = theme('contact_name', $cid_to_contact[$key['cid']], $export);
+                $row[] = $key['serial'];
+                $row[] = $key['pin'];
+            } else {
+                $row[] = theme('contact_name', $cid_to_contact[$key['cid']], !$export);
+                $row[] = $key['serial'];
+                $row[] = $key['start'];
+                $row[] = $key['end'];
+                $row[] = $key['pin'];
             }
-            $row[] = theme('contact_name', $cid_to_contact[$key['cid']], !$export);
-            $row[] = $key['serial'];
-            $row[] = $key['slot'];
-            $row[] = $key['start'];
-            $row[] = $key['end'];
         }
         if (!$export && (user_access('key_edit') || user_access('key_delete'))) {
             // Construct ops array
@@ -430,11 +448,6 @@ function key_add_form ($cid) {
                     ),
                     array(
                         'type' => 'text',
-                        'label' => 'Slot',
-                        'name' => 'slot'
-                    ),
-                    array(
-                        'type' => 'text',
                         'label' => 'Start',
                         'name' => 'start',
                         'value' => date("Y-m-d"),
@@ -445,6 +458,12 @@ function key_add_form ($cid) {
                         'label' => 'End',
                         'name' => 'end',
                         'class' => 'date'
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => 'PIN',
+                        'name' => 'pin'
+                        // 'class' => 'date'
                     ),
                     array(
                         'type' => 'submit',
@@ -519,9 +538,9 @@ function key_edit_form ($kid) {
                     ),
                     array(
                         'type' => 'text',
-                        'label' => 'Slot',
-                        'name' => 'slot',
-                        'value' => $key['slot']
+                        'label' => 'PIN',
+                        'name' => 'pin',
+                        'value' => $key['pin']
                     ),
                     array(
                         'type' => 'submit',
@@ -553,7 +572,7 @@ function key_delete_form ($kid) {
     $key = $data[0];
 
     // Construct key name
-    $key_name = "key:$key[kid] serial:$key[serial] slot:$key[slot] $key[start] -- $key[end]";
+    $key_name = "key:$key[kid] serial:$key[serial] $key[start] -- $key[end]";
 
     // Create form structure
     $form = array(

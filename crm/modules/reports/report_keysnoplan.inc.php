@@ -70,8 +70,7 @@ function keysnoplan_table ($opts = NULL) {
         }
     }
 
-    $inactive_members = member_data(array('filter'=>array('inactive'=>true,'hiatus'=>true,'onboarding'=>true))); // Get inactive members
-// var_dump_pre($inactive_members);
+    $inactive_members = member_data(array('filter'=>array('inactive'=>true))); // Get inactive members
     // build cid index
     $cidlist = array();
     foreach ($inactive_members as $member) {
@@ -88,7 +87,7 @@ function keysnoplan_table ($opts = NULL) {
             , array ('title' => 'Plan Start')
             , array ('title' => 'Plan End')
             , array ('title' => 'Key')
-            , array ('title' => 'Slot')
+            // , array ('title' => 'Slot')
             , array ('title' => 'Key Start')
             , array ('title' => 'Key End')
 
@@ -116,7 +115,7 @@ function keysnoplan_table ($opts = NULL) {
         $row[] = $recentPlan['end'];
         //key
         $row[] = $key['serial'];
-        $row[] = $key['slot'];
+        // $row[] = $key['slot'];
         $row[] = $key['start'];
         $row[] = $key['end'];
 

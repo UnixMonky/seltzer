@@ -78,22 +78,22 @@ function member_data ($opts = array()) {
         if (isset($filter['scholarship']) && $filter['scholarship']) {
             $v_filter++;
             if ($v_filter > 1) $f_sql .= " OR";
-            $f_sql .= " (`plan`.`enabled` AND `plan`.`active` AND `plan`.`name` LIKE '%scholarship%' AND `membership`.`start` IS NOT NULL AND `membership`.`start` < NOW() AND (`membership`.`end` IS NULL OR `membership`.`end` > NOW()))\n";
+            $f_sql .= " (`plan`.`active` AND `plan`.`name` LIKE '%scholarship%' AND `membership`.`start` IS NOT NULL AND `membership`.`start` < NOW() AND (`membership`.`end` IS NULL OR `membership`.`end` > NOW()))\n";
         }
         if (isset($filter['onboarding']) && $filter['onboarding']) {
             $v_filter++;
             if ($v_filter > 1) $f_sql .= " OR";
-            $f_sql .= " (`plan`.`enabled` AND `plan`.`name` LIKE '%Onboarding%' AND `membership`.`start` IS NOT NULL AND `membership`.`start` < NOW() AND (`membership`.`end` IS NULL OR `membership`.`end` > NOW()))\n";
+            $f_sql .= " (`plan`.`active` AND `plan`.`name` LIKE '%Onboarding%' AND `membership`.`start` IS NOT NULL AND `membership`.`start` < NOW() AND (`membership`.`end` IS NULL OR `membership`.`end` > NOW()))\n";
         }
         if (isset($filter['hiatus']) && $filter['hiatus']) {
             $v_filter++;
             if ($v_filter > 1) $f_sql .= " OR";
-            $f_sql .= " (`plan`.`enabled` AND `plan`.`name` LIKE '%hiatus%' AND `membership`.`start` IS NOT NULL AND `membership`.`start` < NOW() AND (`membership`.`end` IS NULL OR `membership`.`end` > NOW()))\n";
+            $f_sql .= " (`plan`.`active` AND `plan`.`name` LIKE '%hiatus%' AND `membership`.`start` IS NOT NULL AND `membership`.`start` < NOW() AND (`membership`.`end` IS NULL OR `membership`.`end` > NOW()))\n";
         }
         if (isset($filter['inactive']) && $filter['inactive']) {
             $v_filter++;
             if ($v_filter > 1) $f_sql .= " OR";
-            $f_sql .= " (NOT `plan`.`active` )\n";
+            $f_sql .= " (NOT `plan`.`active` OR (`membership`.`start` IS NOT NULL AND `membership`.`start` < NOW() AND (`membership`.`end` OR `membership`.`end` < NOW())))\n";
         }
         if (!empty($f_sql)) { $sql .= " AND ( \n$f_sql\n )"; }
     }
