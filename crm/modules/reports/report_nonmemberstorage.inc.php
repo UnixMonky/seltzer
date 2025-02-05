@@ -48,9 +48,12 @@ function get_storage_cids_without_plan () {
 // var_dump_pre($storage_contacts);
 
     $cids = array();
-    foreach (member_data(array('cid'=>$storage_contacts,'filter'=>array('inactive'=>true,'hiatus'=>true))) as $contact) {
-        $cids[] = $contact['cid'];
+    // foreach (member_data(array('cid'=>$storage_contacts,'filter'=>array('inactive'=>true,'hiatus'=>true))) as $contact) {
+    foreach (member_data(array('cid'=>$storage_contacts,'filter'=>array('active'=>true,'scholarship'=>true))) as $contact) {
+        $active_cids[] = $contact['cid'];
+        
     }
+    $cids = array_diff($storage_contacts, array_merge($active_cids, ["",null]));
 
 // var_dump_pre($cids);
     return $cids;
@@ -111,10 +114,18 @@ function nonmemberstorage_table ($opts = NULL) {
         $name = theme('contact_name', $contact['cid'], !$export);
         $phone = $contact['phone'];
         $email = $contact['email'];
-        $recentMembership = end($member['membership']);
-        $plan = $recentMembership['plan']['name']; // then this is an active plan
-        $planstart = $recentMembership['start'];
-        $planend = $recentMembership['end'];
+        // $recentMembership = end($member['membership']);
+        if (is_array($member['membership'])) {
+            $recentMembership = end($member['membership']);
+            $plan = $recentMembership['plan']['name']; // then this is an active plan
+            $planstart = $recentMembership['start'];
+            $planend = $recentMembership['end'];
+        } else {
+            $recentMembership = "";
+            $plan = ""; // then this is an active plan
+            $planstart = "";
+            $planend = "";
+        }
 
         $row[] = $name;
         if ($export) {
