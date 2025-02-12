@@ -70,28 +70,14 @@ function keysnoplan_table ($opts = NULL) {
         }
     }
 
-    // $inactive_members = member_data(array('filter'=>array('inactive'=>true,'hiatus'=>true,'onboarding'=>true))); // Get inactive members
-    $active_members = member_data(array('filter'=>array('active'=>true,'scholarship'=>true))); // Get active members
-    foreach ($active_members as $active) {
-        $activeCids[] = $active['cid'];
+    $inactive_members = member_data(array('filter'=>array('inactive'=>true))); // Get active members
+    foreach ($inactive_members as $inactive) {
+        $inactiveCids[] = $inactive['cid'];
     }
-    $all_members = member_data();
-    foreach ($all_members as $all) {
-        $allCids[] = $all['cid'];
-    }
-    $inactiveCids = array_diff($allCids, array_merge($activeCids, ["",null]));
-    // $inactive_members = $all_members;
-// var_dump_pre($inactive_members);
-    // build cid index
-    // $cidlist = array();
-    // foreach ($inactive_members as $member) {
-    //     $cidlist[] = $member['cid'];
-    // }
-    // var_dump_pre("Pre get_keys_for_cids");
-    // $keysnoplan = get_keys_for_cids($cidlist);
+
     $keysnoplan = get_keys_for_cids($inactiveCids);
-// var_dump_pre($keysnoplan);
-     // Initialize table
+
+    // Initialize table
     $table = array(
         'columns' => array(
             array('title' => 'Name')

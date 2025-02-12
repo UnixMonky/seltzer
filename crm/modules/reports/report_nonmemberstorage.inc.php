@@ -47,16 +47,14 @@ function get_storage_cids_without_plan () {
     }
 // var_dump_pre($storage_contacts);
 
-    $cids = array();
-    // foreach (member_data(array('cid'=>$storage_contacts,'filter'=>array('inactive'=>true,'hiatus'=>true))) as $contact) {
-    foreach (member_data(array('cid'=>$storage_contacts,'filter'=>array('active'=>true,'scholarship'=>true))) as $contact) {
-        $active_cids[] = $contact['cid'];
-        
+    // $cids = array();
+    foreach (member_data(array('cid'=>$storage_contacts,'filter'=>array('inactive'=>true))) as $contact) {
+        $inactive_cids[] = $contact['cid'];
     }
-    $cids = array_diff($storage_contacts, array_merge($active_cids, ["",null]));
+    // $cids = array_diff($storage_contacts, array_merge($active_cids, ["",null]));
 
 // var_dump_pre($cids);
-    return $cids;
+    return $inactive_cids;
 }
 
 // Tables ///////////////////////////////////////////////////////////////////////
